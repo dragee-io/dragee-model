@@ -14,10 +14,16 @@ export interface Dragee {
     depends_on: Dependency[]
 }
 export type Namespace = string;
+export type ReportStats = {
+    rulesCount: number,
+    passCount: number,
+    errorsCount: number,
+}
 export type Report = {
     pass: boolean,
     namespace: Namespace,
     errors: string[],
+    stats: ReportStats
 };
 export type SuccessfulRuleResult = {
     pass: true
@@ -107,6 +113,11 @@ export class Asserter {
             pass: rulesResultsErrors.length === 0,
             namespace: this.namespace,
             errors: rulesResultsErrors,
+            stats: {
+                errorsCount: rulesResultsErrors.length,
+                passCount: this.rules.length - rulesResultsErrors.length,
+                rulesCount: this.rules.length
+            }
         }
     }
 }
