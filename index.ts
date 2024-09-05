@@ -123,14 +123,23 @@ export class Asserter {
 }
 
 /**
+ * Rule severity
+ */
+export enum RuleSeverity {
+    ERROR, WARN, INFO
+}
+
+/**
  * Rule class => label and handler
  */
 export class Rule {
     readonly label!: string
+    readonly severity!: RuleSeverity
     readonly handler!: (dragees: Dragee[]) => RuleResult[]
 
-    constructor(label: string, handler: (dragees: Dragee[]) => RuleResult[]) {
+    constructor(label: string, severity: RuleSeverity, handler: (dragees: Dragee[]) => RuleResult[]) {
         this.label = label;
+        this.severity = severity;
         this.handler = handler;
     }
 }
