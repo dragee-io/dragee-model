@@ -126,7 +126,9 @@ export class Asserter {
  * Rule severity
  */
 export enum RuleSeverity {
-    ERROR, WARN, INFO
+    ERROR = 'error',
+    WARN = 'warn',
+    INFO = 'info'
 }
 
 /**
