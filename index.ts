@@ -10,7 +10,7 @@ export interface Dependency extends Record<string, DependencyType> {
 }
 export interface Dragee {
     name: string,
-    kind_of: string,
+    profile: string,
     depends_on: Dependency[]
 }
 export type Namespace = string;
