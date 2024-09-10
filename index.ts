@@ -148,19 +148,21 @@ export class Rule {
 
 /**
  * Expect a dragee to follow a unique dragee eval rule
- * @param dragee 
- * @param errorMsg 
- * @param evalFn 
+ * @param root Tested dragee, used for the error report
+ * @param dragee Assert dragee, parameter of eval function
+ * @param errorMsg Error message
+ * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
-export const expectDragee = (dragee: Dragee, errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult =>
-    evalFn(dragee) ? successful() : failed(dragee, errorMsg)
+export const expectDragee = (root: Dragee, dragee: Dragee, errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult =>
+    evalFn(dragee) ? successful() : failed(root, errorMsg)
 
 /**
  * Expect multiple dependancies dragees to follow a multiple dragee eval rule
- * @param dragee 
- * @param errorMsg 
- * @param evalFn 
+ * @param root Tested dragee, used for the error report
+ * @param dragee Assert dragee, parameter of eval function
+ * @param errorMsg Error message
+ * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
 export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: string, evalFn: (dragees: Dragee[]) => boolean): RuleResult =>
@@ -168,10 +170,11 @@ export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: st
 
 /**
  * Expect multiple dragees to follow a unique dragee eval rule
- * @param dragee 
- * @param errorMsg 
- * @param evalFn 
+ * @param root Tested dragee, used for the error report
+ * @param dragee Assert dragee, parameter of eval function
+ * @param errorMsg Error message
+ * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
-export const multipleExpectDragees = (dragees: Dragee[], errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult[] =>
-    dragees.map(d => evalFn(d) ? successful() : failed(d, errorMsg))
+export const multipleExpectDragees = (root: Dragee, dragees: Dragee[], errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult[] =>
+    dragees.map(d => evalFn(d) ? successful() : failed(root, errorMsg))
