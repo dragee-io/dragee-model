@@ -19,10 +19,14 @@ export type ReportStats = {
     passCount: number,
     errorsCount: number,
 }
+export type RuleError = {
+    message: string,
+    drageeName: string
+}
 export type Report = {
     pass: boolean,
     namespace: Namespace,
-    errors: string[],
+    errors: RuleError[],
     stats: ReportStats
 };
 export type SuccessfulRuleResult = {
@@ -30,26 +34,22 @@ export type SuccessfulRuleResult = {
 }
 export type FailedRuleResult = {
     pass: false,
-    message: string,
+    error: RuleError
 }
 export type RuleResult = SuccessfulRuleResult | FailedRuleResult
 
 export type Successful = () => SuccessfulRuleResult;
 
-export type Failed = (message: string) => FailedRuleResult;
+export type Failed = (dragee: Dragee, message: string) => FailedRuleResult;
 
-export type RuleError = {
-    namespace: Namespace,
-    error: string
-}
 export type AssertHandler = (dragees: Dragee[]) => Report
 
 export const successful: Successful = () => {
     return {pass: true}
 }
 
-export const failed: Failed = (message: string) => {
-    return {pass: false, message: message}
+export const failed: Failed = (dragee: Dragee, message: string) => {
+    return {pass: false, error: {drageeName: dragee.name, message}}
 }
 
 export interface DrageeDependency {
@@ -107,7 +107,7 @@ export class Asserter {
         const rulesResultsErrors = this.rules
             .flatMap(rule => rule.handler(dragees))
             .filter((result): result is FailedRuleResult => !result.pass)
-            .map(result => result.message);
+            .map(result => result.error);
     
         return {
             pass: rulesResultsErrors.length === 0,
@@ -154,17 +154,17 @@ export class Rule {
  * @returns RuleResult success/fail
  */
 export const expectDragee = (dragee: Dragee, errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult =>
-    evalFn(dragee) ? successful() : failed(errorMsg)
+    evalFn(dragee) ? successful() : failed(dragee, errorMsg)
 
 /**
- * Expect multiple dragees to follow a multiple dragee eval rule
+ * Expect multiple dependancies dragees to follow a multiple dragee eval rule
  * @param dragee 
  * @param errorMsg 
  * @param evalFn 
  * @returns RuleResult success/fail
  */
-export const expectDragees = (dragees: Dragee[], errorMsg: string, evalFn: (dragees: Dragee[]) => boolean): RuleResult =>
-    evalFn(dragees) ? successful() : failed(errorMsg)
+export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: string, evalFn: (dragees: Dragee[]) => boolean): RuleResult =>
+    evalFn(dependancies) ? successful() : failed(root, errorMsg)
 
 /**
  * Expect multiple dragees to follow a unique dragee eval rule
@@ -174,4 +174,4 @@ export const expectDragees = (dragees: Dragee[], errorMsg: string, evalFn: (drag
  * @returns RuleResult success/fail
  */
 export const multipleExpectDragees = (dragees: Dragee[], errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult[] =>
-    dragees.map(d => evalFn(d) ? successful() : failed(errorMsg))
+    dragees.map(d => evalFn(d) ? successful() : failed(d, errorMsg))
