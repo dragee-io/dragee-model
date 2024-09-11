@@ -96,11 +96,11 @@ export const findRules = (dir: string) : Rule[] => {
  */
 export class Asserter {
     readonly namespace!: Namespace
-    readonly rules!: Rule[]
+    readonly rules!: AsserterRule[]
 
     constructor(namespace: string, rules: Rule[]) {
         this.namespace = namespace;
-        this.rules = rules;
+        this.rules = rules.map(rule => new AsserterRule(generateRuleId(namespace, rule), rule));
     }
 
     readonly handler: AssertHandler = (dragees: Dragee[]): Report => {
@@ -145,6 +145,24 @@ export class Rule {
         this.handler = handler;
     }
 }
+
+class AsserterRule extends Rule {
+    readonly id!: string
+
+    constructor(id: string, rule: Rule) {
+        super(rule.label, rule.severity, rule.handler);
+        this.id = id;
+    }
+}
+
+const generateRuleId = (namespace: string, rule: Rule) => `${namespace}/${constructRuleId(rule.label)}`
+
+const constructRuleId = (label: string) =>
+    label.replace(/[".*+?^${}()|[\]]/g, "") // Deleting special characters
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizing and deleting accents
+        .toLowerCase() // Lower case
+        .trim().replace(/['\\/]/g, " ") // Replacing apostrophes, slashes and backslashes by spaces
+        .trim().replace(/\s+/g, "-"); // Replacing spaces by dashes
 
 /**
  * Expect a dragee to follow a unique dragee eval rule
