@@ -20,6 +20,7 @@ export type ReportStats = {
     errorsCount: number,
 }
 export type RuleError = {
+    ruleId?: string,
     message: string,
     drageeName: string
 }
@@ -30,9 +31,11 @@ export type Report = {
     stats: ReportStats
 };
 export type SuccessfulRuleResult = {
+    ruleId?: string,
     pass: true
 }
 export type FailedRuleResult = {
+    ruleId?: string,
     pass: false,
     error: RuleError
 }
@@ -105,9 +108,15 @@ export class Asserter {
 
     readonly handler: AssertHandler = (dragees: Dragee[]): Report => {
         const rulesResultsErrors = this.rules
-            .flatMap(rule => rule.handler(dragees))
+            .flatMap(rule => rule.handler(dragees).map(result => {
+                result.ruleId = rule.id;
+                return result;
+            }))
             .filter((result): result is FailedRuleResult => !result.pass)
-            .map(result => result.error);
+            .map(result => {
+                result.error.ruleId = result.ruleId;
+                return result.error;
+            });
     
         return {
             pass: rulesResultsErrors.length === 0,
