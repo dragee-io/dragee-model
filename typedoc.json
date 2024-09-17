@@ -1,7 +1,5 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["src/rules"],
-    "out": "docs",
     "entryPointStrategy": "expand",
     "excludeNotDocumented": true,
     "excludeProtected": true,
