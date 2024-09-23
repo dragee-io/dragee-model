@@ -45,7 +45,7 @@ export type Successful = () => SuccessfulRuleResult;
 
 export type Failed = (dragee: Dragee, message: string) => FailedRuleResult;
 
-export type AssertHandler = (dragees: Dragee[]) => Report
+export type AssertHandler = (asserter: Asserter, dragees: Dragee[]) => Report
 
 export const successful: Successful = () => {
     return {pass: true}
@@ -61,7 +61,7 @@ export interface DrageeDependency {
 }
 
 /**
- * Find direct dependancies for a root dragee
+ * Finds direct dependancies for a root dragee
  * @param root 
  * @param allDragees 
  * @returns 
@@ -80,9 +80,12 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
 
 /**
  * Rules scanning in asserter directory
+ * Adds a generated ID for every rule
+ * @param namespace asserter namespace
+ * @param dir scanned directory
  * @returns rules found in dir
  */
-export const findRules = (dir: string) : Rule[] => {
+export const findRules = (namespace: string, dir: string) : Rule[] => {
     const scan = new Glob(`*.rule.ts`).scanSync({
         cwd: dir,
         absolute: true,
@@ -91,42 +94,41 @@ export const findRules = (dir: string) : Rule[] => {
 
     return Array.from(scan)
         .map(file => require(file).default)
-        .filter(rule => rule && rule instanceof Rule);
+        .filter((rule): rule is DeclaredRule => rule)
+        .map(rule => declaredRuleToRule(namespace, rule))
+}
+
+export type Asserter = {
+    readonly namespace: Namespace,
+    readonly rules: Rule[],
 }
 
 /**
- * Asserter class => namespace, rules and built-in handler
+ * Tests dragees list against the asserter rules, and builds a result report
+ * @param asserter Asserter including dragees rules
+ * @param dragees Dragees to test against the asserter rules
+ * @returns Report of dragees testing
  */
-export class Asserter {
-    readonly namespace!: Namespace
-    readonly rules!: AsserterRule[]
+export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Dragee[]): Report => {
+    const rulesResultsErrors = asserter.rules
+        .flatMap(rule => rule.handler(dragees).map(result => {
+            result.ruleId = rule.id;
+            return result;
+        }))
+        .filter((result): result is FailedRuleResult => !result.pass)
+        .map(result => {
+            result.error.ruleId = result.ruleId;
+            return result.error;
+        });
 
-    constructor(namespace: string, rules: Rule[]) {
-        this.namespace = namespace;
-        this.rules = rules.map(rule => new AsserterRule(generateRuleId(namespace, rule), rule));
-    }
-
-    readonly handler: AssertHandler = (dragees: Dragee[]): Report => {
-        const rulesResultsErrors = this.rules
-            .flatMap(rule => rule.handler(dragees).map(result => {
-                result.ruleId = rule.id;
-                return result;
-            }))
-            .filter((result): result is FailedRuleResult => !result.pass)
-            .map(result => {
-                result.error.ruleId = result.ruleId;
-                return result.error;
-            });
-    
-        return {
-            pass: rulesResultsErrors.length === 0,
-            namespace: this.namespace,
-            errors: rulesResultsErrors,
-            stats: {
-                errorsCount: rulesResultsErrors.length,
-                passCount: this.rules.length - rulesResultsErrors.length,
-                rulesCount: this.rules.length
-            }
+    return {
+        pass: rulesResultsErrors.length === 0,
+        namespace: asserter.namespace,
+        errors: rulesResultsErrors,
+        stats: {
+            errorsCount: rulesResultsErrors.length,
+            passCount: asserter.rules.length - rulesResultsErrors.length,
+            rulesCount: asserter.rules.length
         }
     }
 }
@@ -140,32 +142,29 @@ export enum RuleSeverity {
     INFO = 'info'
 }
 
+export type DeclaredRule = {
+    readonly label: string,
+    readonly severity: RuleSeverity,
+    readonly handler: (dragees: Dragee[]) => RuleResult[]
+}
+
+export type Rule = DeclaredRule & { readonly id: string }
+
+const declaredRuleToRule = (namespace: Namespace, rule: DeclaredRule): Rule => {
+    return { id: generateRuleId(namespace, rule), ...rule }
+}
+
+const generateRuleId = (namespace: Namespace, rule: DeclaredRule) => `${namespace}/${constructRuleId(rule.label)}`
+
 /**
- * Rule class => label and handler
+ * Constructs a formatted rule ID from its label  
+ * Example :
+ * ```
+ * Aggregates Allowed Dependencies => aggregates-allowed-dependencies
+ * ```
+ * @param label rule label
+ * @returns formatted ID
  */
-export class Rule {
-    readonly label!: string
-    readonly severity!: RuleSeverity
-    readonly handler!: (dragees: Dragee[]) => RuleResult[]
-
-    constructor(label: string, severity: RuleSeverity, handler: (dragees: Dragee[]) => RuleResult[]) {
-        this.label = label;
-        this.severity = severity;
-        this.handler = handler;
-    }
-}
-
-class AsserterRule extends Rule {
-    readonly id!: string
-
-    constructor(id: string, rule: Rule) {
-        super(rule.label, rule.severity, rule.handler);
-        this.id = id;
-    }
-}
-
-const generateRuleId = (namespace: string, rule: Rule) => `${namespace}/${constructRuleId(rule.label)}`
-
 const constructRuleId = (label: string) =>
     label.replace(/[".*+?^${}()|[\]]/g, "") // Deleting special characters
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizing and deleting accents
@@ -174,7 +173,7 @@ const constructRuleId = (label: string) =>
         .trim().replace(/\s+/g, "-"); // Replacing spaces by dashes
 
 /**
- * Expect a dragee to follow a unique dragee eval rule
+ * Expects a dragee to follow a unique dragee eval rule
  * @param root Tested dragee, used for the error report
  * @param dragee Assert dragee, parameter of eval function
  * @param errorMsg Error message
@@ -185,7 +184,7 @@ export const expectDragee = (root: Dragee, dragee: Dragee, errorMsg: string, eva
     evalFn(dragee) ? successful() : failed(root, errorMsg)
 
 /**
- * Expect multiple dependancies dragees to follow a multiple dragee eval rule
+ * Expects multiple dependancies dragees to follow a multiple dragee eval rule
  * @param root Tested dragee, used for the error report
  * @param dragee Assert dragee, parameter of eval function
  * @param errorMsg Error message
@@ -196,7 +195,7 @@ export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: st
     evalFn(dependancies) ? successful() : failed(root, errorMsg)
 
 /**
- * Expect multiple dragees to follow a unique dragee eval rule
+ * Expects multiple dragees to follow a unique dragee eval rule
  * @param root Tested dragee, used for the error report
  * @param dragee Assert dragee, parameter of eval function
  * @param errorMsg Error message
