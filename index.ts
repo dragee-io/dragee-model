@@ -13,7 +13,6 @@ export interface Dragee {
     profile: string,
     depends_on: Dependency[]
 }
-export type Namespace = string;
 export type ReportStats = {
     rulesCount: number,
     passCount: number,
@@ -26,7 +25,7 @@ export type RuleError = {
 }
 export type Report = {
     pass: boolean,
-    namespace: Namespace,
+    namespace: string,
     errors: RuleError[],
     stats: ReportStats
 };
@@ -99,7 +98,7 @@ export const findRules = (namespace: string, dir: string) : Rule[] => {
 }
 
 export type Asserter = {
-    readonly namespace: Namespace,
+    readonly namespace: string,
     readonly rules: Rule[],
 }
 
@@ -150,11 +149,11 @@ export type DeclaredRule = {
 
 export type Rule = DeclaredRule & { readonly id: string }
 
-const declaredRuleToRule = (namespace: Namespace, rule: DeclaredRule): Rule => {
+const declaredRuleToRule = (namespace: string, rule: DeclaredRule): Rule => {
     return { id: generateRuleId(namespace, rule), ...rule }
 }
 
-const generateRuleId = (namespace: Namespace, rule: DeclaredRule) => `${namespace}/${constructRuleId(rule.label)}`
+const generateRuleId = (namespace: string, rule: DeclaredRule) => `${namespace}/${constructRuleId(rule.label)}`
 
 /**
  * Constructs a formatted rule ID from its label  
