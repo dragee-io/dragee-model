@@ -1,8 +1,8 @@
 {
-  "name": "@dragee-io/asserter-type",
+  "name": "@dragee-io/type",
   "module": "index.ts",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {},
   "devDependencies": {
     "@types/bun": "latest"
@@ -10,5 +10,9 @@
   "peerDependencies": {
     "typescript": "^5.5.0",
     "typedoc": "^0.26.7"
-  }
+  },
+  "workspaces": [
+    "asserter/*",
+    "grapher/*"
+  ]
 }

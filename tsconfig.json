@@ -19,6 +19,11 @@
     "skipLibCheck": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    /* Multi-package */
+    "paths": {
+      "@dragee-io/asserter-type": ["./asserter/*"]
+    }
   }
 }
