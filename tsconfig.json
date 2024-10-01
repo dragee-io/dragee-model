@@ -23,9 +23,9 @@
 
     /* Multi-package */
     "paths": {
-      "@dragee-io/asserter-type": ["./asserter/*"],
-      "@dragee-io/grapher-type": ["./grapher/*"],
-      "@dragee-io/type": ["./common/*"]
+      "@dragee-io/asserter-type": ["./packages/asserter/*"],
+      "@dragee-io/grapher-type": ["./packages/grapher/*"],
+      "@dragee-io/type": ["./packages/common/*"]
     }
   }
 }

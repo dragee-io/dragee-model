@@ -1,5 +1,4 @@
 {
-  "name": "dragee-types",
   "private": true,
   "workspaces": [
     "packages/*"
