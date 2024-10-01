@@ -22,6 +22,8 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Multi-package */
+    "composite": true,
+    "declarationMap": true,
     "paths": {
       "@dragee-io/asserter-type": ["./packages/asserter/*"],
       "@dragee-io/grapher-type": ["./packages/grapher/*"],
