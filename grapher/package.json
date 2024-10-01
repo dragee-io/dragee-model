@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/MichaelBernasinski/dragee-model.git",
-    "directory": "packages/grapher"
+    "directory": "grapher"
   },
   "peerDependencies": {
     "typescript": "^5.5.0"
