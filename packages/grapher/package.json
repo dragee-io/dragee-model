@@ -2,9 +2,9 @@
   "name": "@dragee-io/grapher-type",
   "module": "index.ts",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {},
-  "dependencies": {
-    "@dragee-io/type": "workspace:*"
+  "peerDependencies": {
+    "typescript": "^5.5.0"
   }
 }

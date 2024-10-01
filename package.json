@@ -1,18 +1,10 @@
 {
-  "name": "@dragee-io/type",
+  "name": "@dragee-io/all-types",
+  "private": true,
   "module": "index.ts",
   "type": "module",
-  "version": "0.0.3",
-  "scripts": {},
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.5.0",
-    "typedoc": "^0.26.7"
-  },
+  "version": "0.0.4",
   "workspaces": [
-    "asserter/*",
-    "grapher/*"
+    "packages/*"
   ]
 }

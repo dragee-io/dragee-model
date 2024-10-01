@@ -1,0 +1,10 @@
+{
+  "name": "@dragee-io/type",
+  "module": "index.ts",
+  "type": "module",
+  "version": "0.0.4",
+  "scripts": {},
+  "peerDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
