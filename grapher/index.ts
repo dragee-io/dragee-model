@@ -1,6 +1,5 @@
 import { Glob } from "bun";
-import type { Dragee } from "@dragee-io/type";
-import { generateId } from "@dragee-io/type/utils/id-generation.utils.ts"
+import { type Dragee, generateId } from "@dragee-io/type"
 
 export type Grapher = {
     readonly namespace: string,

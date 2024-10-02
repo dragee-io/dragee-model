@@ -1,3 +1,5 @@
+export { generateId } from "./utils/id-generation.utils.ts";
+
 export enum DependencyType {
     CONSTRUCTOR = 'constructor',
     FIELD = 'field',

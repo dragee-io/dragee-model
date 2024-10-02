@@ -1,8 +1,5 @@
 {
   "private": true,
-  "scripts": {
-    "clean": "rm -rf node_modules common/node_modules asserter/node_modules grapher/node_modules bun.lockb common/bun.lockb asserter/bun.lockb grapher/bun.lockb"
-  },
   "workspaces": [
     "asserter",
     "common",
