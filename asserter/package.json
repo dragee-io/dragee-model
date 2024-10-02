@@ -14,5 +14,8 @@
   "peerDependencies": {
     "typescript": "^5.5.0",
     "typedoc": "^0.26.7"
+  },
+  "dependencies": {
+    "@dragee-io/type": "workspace:*"
   }
 }

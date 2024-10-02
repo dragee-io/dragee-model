@@ -10,5 +10,8 @@
   },
   "peerDependencies": {
     "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@dragee-io/type": "workspace:*"
   }
 }
