@@ -1,5 +1,6 @@
 import { Glob } from "bun";
 import type { Dragee } from "@dragee-io/type";
+import { generateId } from "@dragee-io/type/utils/id-generation.utils.ts"
 
 export type ReportStats = {
     rulesCount: number,
@@ -133,26 +134,8 @@ export type DeclaredRule = {
 export type Rule = DeclaredRule & { readonly id: string }
 
 const declaredRuleToRule = (namespace: string, rule: DeclaredRule): Rule => {
-    return { id: generateRuleId(namespace, rule), ...rule }
+    return { id: generateId(namespace, rule.label), ...rule }
 }
-
-const generateRuleId = (namespace: string, rule: DeclaredRule) => `${namespace}/${constructRuleId(rule.label)}`
-
-/**
- * Constructs a formatted rule ID from its label  
- * Example :
- * ```
- * Aggregates Allowed Dependencies => aggregates-allowed-dependencies
- * ```
- * @param label rule label
- * @returns formatted ID
- */
-const constructRuleId = (label: string) =>
-    label.replace(/[".*+?^${}()|[\]]/g, "") // Deleting special characters
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizing and deleting accents
-        .toLowerCase() // Lower case
-        .trim().replace(/['\\/]/g, " ") // Replacing apostrophes, slashes and backslashes by spaces
-        .trim().replace(/\s+/g, "-"); // Replacing spaces by dashes
 
 /**
  * Expects a dragee to follow a unique dragee eval rule

@@ -1,5 +1,6 @@
 import { Glob } from "bun";
 import type { Dragee } from "@dragee-io/type";
+import { generateId } from "@dragee-io/type/utils/id-generation.utils.ts"
 
 export type Grapher = {
     readonly namespace: string,
@@ -34,23 +35,5 @@ export const findGraphs = (namespace: string, dir: string) : Graph[] => {
 }
 
 const declaredGraphToGraph = (namespace: string, graph: DeclaredGraph): Graph => {
-    return { id: generateGraphId(namespace, graph), ...graph }
+    return { id: generateId(namespace, graph.label), ...graph }
 }
-
-const generateGraphId = (namespace: string, graph: DeclaredGraph) => `${namespace}/${constructGraphId(graph.label)}`
-
-/**
- * Constructs a formatted graph ID from its label  
- * Example :
- * ```
- * Aggregates Allowed Dependencies => aggregates-allowed-dependencies
- * ```
- * @param label graph label
- * @returns formatted ID
- */
-const constructGraphId = (label: string) =>
-    label.replace(/[".*+?^${}()|[\]]/g, "") // Deleting special characters
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizing and deleting accents
-        .toLowerCase() // Lower case
-        .trim().replace(/['\\/]/g, " ") // Replacing apostrophes, slashes and backslashes by spaces
-        .trim().replace(/\s+/g, "-"); // Replacing spaces by dashes
