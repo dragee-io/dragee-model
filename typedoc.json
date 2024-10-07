@@ -4,4 +4,15 @@
     "excludeNotDocumented": true,
     "excludeProtected": true,
     "excludeReferences": true,
+    "highlightLanguages": [
+        "bash",
+        "console",
+        "css",
+        "html",
+        "javascript",
+        "json",
+        "mermaid",
+        "tsx",
+        "typescript"
+    ]
 }
