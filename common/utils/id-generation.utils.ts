@@ -12,7 +12,7 @@ export const generateId = (namespace: string, label: string) => `${namespace}/${
  */
 const constructId = (label: string) =>
     label.replace(/[".*+?^${}()|[\]]/g, "") // Deleting special characters
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizing and deleting accents
+        .normalize("NFD").replace(/\p{Diacritic}/gu, '') // Normalizing and deleting accents
         .toLowerCase() // Lower case
         .trim().replace(/['\\/]/g, " ") // Replacing apostrophes, slashes and backslashes by spaces
         .trim().replace(/\s+/g, "-"); // Replacing spaces by dashes
