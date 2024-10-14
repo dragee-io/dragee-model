@@ -1,64 +1,64 @@
-import { Glob } from "bun";
-import { type Dragee, generateId } from "../common"
+import { Glob } from 'bun';
+import { type Dragee, generateId } from '../common';
 
 export type ReportStats = {
-    rulesCount: number,
-    passCount: number,
-    errorsCount: number,
-}
+    rulesCount: number;
+    passCount: number;
+    errorsCount: number;
+};
 export type RuleError = {
-    ruleId?: string,
-    message: string,
-    drageeName: string
-}
+    ruleId?: string;
+    message: string;
+    drageeName: string;
+};
 export type Report = {
-    pass: boolean,
-    namespace: string,
-    errors: RuleError[],
-    stats: ReportStats
+    pass: boolean;
+    namespace: string;
+    errors: RuleError[];
+    stats: ReportStats;
 };
 export type SuccessfulRuleResult = {
-    ruleId?: string,
-    pass: true
-}
+    ruleId?: string;
+    pass: true;
+};
 export type FailedRuleResult = {
-    ruleId?: string,
-    pass: false,
-    error: RuleError
-}
-export type RuleResult = SuccessfulRuleResult | FailedRuleResult
+    ruleId?: string;
+    pass: false;
+    error: RuleError;
+};
+export type RuleResult = SuccessfulRuleResult | FailedRuleResult;
 
 export type Successful = () => SuccessfulRuleResult;
 
 export type Failed = (dragee: Dragee, message: string) => FailedRuleResult;
 
-export type AssertHandler = (asserter: Asserter, dragees: Dragee[]) => Report
+export type AssertHandler = (asserter: Asserter, dragees: Dragee[]) => Report;
 
 export const successful: Successful = () => {
-    return {pass: true}
-}
+    return { pass: true };
+};
 
 export const failed: Failed = (dragee: Dragee, message: string) => {
-    return {pass: false, error: {drageeName: dragee.name, message}}
-}
+    return { pass: false, error: { drageeName: dragee.name, message } };
+};
 
 /**
  * Finds direct dependancies for a root dragee
- * @param root 
- * @param allDragees 
- * @returns 
+ * @param root
+ * @param allDragees
+ * @returns
  */
 export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
     if (!root.depends_on) {
-        return {root, dependencies: []};
+        return { root, dependencies: [] };
     }
 
     const dependencies = Object.keys(root.depends_on)
         .map(dependency => allDragees.find(dragee => dragee.name === dependency))
         .filter((dragee): dragee is Dragee => dragee !== undefined);
 
-    return {root, dependencies}
-}
+    return { root, dependencies };
+};
 
 /**
  * Rules scanning in asserter directory
@@ -67,8 +67,8 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
  * @param dir scanned directory
  * @returns rules found in dir
  */
-export const findRules = (namespace: string, dir: string) : Rule[] => {
-    const scan = new Glob(`*.rule.ts`).scanSync({
+export const findRules = (namespace: string, dir: string): Rule[] => {
+    const scan = new Glob('*.rule.ts').scanSync({
         cwd: dir,
         absolute: true,
         onlyFiles: true
@@ -77,13 +77,13 @@ export const findRules = (namespace: string, dir: string) : Rule[] => {
     return Array.from(scan)
         .map(file => require(file).default)
         .filter((rule): rule is DeclaredRule => rule)
-        .map(rule => declaredRuleToRule(namespace, rule))
-}
+        .map(rule => declaredRuleToRule(namespace, rule));
+};
 
 export type Asserter = {
-    readonly namespace: string,
-    readonly rules: Rule[],
-}
+    readonly namespace: string;
+    readonly rules: Rule[];
+};
 
 /**
  * Tests dragees list against the asserter rules, and builds a result report
@@ -93,10 +93,12 @@ export type Asserter = {
  */
 export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Dragee[]): Report => {
     const rulesResultsErrors = asserter.rules
-        .flatMap(rule => rule.handler(dragees).map(result => {
-            result.ruleId = rule.id;
-            return result;
-        }))
+        .flatMap(rule =>
+            rule.handler(dragees).map(result => {
+                result.ruleId = rule.id;
+                return result;
+            })
+        )
         .filter((result): result is FailedRuleResult => !result.pass)
         .map(result => {
             result.error.ruleId = result.ruleId;
@@ -112,8 +114,8 @@ export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Drag
             passCount: asserter.rules.length - rulesResultsErrors.length,
             rulesCount: asserter.rules.length
         }
-    }
-}
+    };
+};
 
 /**
  * Rule severity
@@ -125,16 +127,16 @@ export enum RuleSeverity {
 }
 
 export type DeclaredRule = {
-    readonly label: string,
-    readonly severity: RuleSeverity,
-    readonly handler: (dragees: Dragee[]) => RuleResult[]
-}
+    readonly label: string;
+    readonly severity: RuleSeverity;
+    readonly handler: (dragees: Dragee[]) => RuleResult[];
+};
 
-export type Rule = DeclaredRule & { readonly id: string }
+export type Rule = DeclaredRule & { readonly id: string };
 
 const declaredRuleToRule = (namespace: string, rule: DeclaredRule): Rule => {
-    return { id: generateId(namespace, rule.label), ...rule }
-}
+    return { id: generateId(namespace, rule.label), ...rule };
+};
 
 /**
  * Expects a dragee to follow a unique dragee eval rule
@@ -144,8 +146,12 @@ const declaredRuleToRule = (namespace: string, rule: DeclaredRule): Rule => {
  * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
-export const expectDragee = (root: Dragee, dragee: Dragee, errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult =>
-    evalFn(dragee) ? successful() : failed(root, errorMsg)
+export const expectDragee = (
+    root: Dragee,
+    dragee: Dragee,
+    errorMsg: string,
+    evalFn: (dragee: Dragee) => boolean
+): RuleResult => (evalFn(dragee) ? successful() : failed(root, errorMsg));
 
 /**
  * Expects multiple dependancies dragees to follow a multiple dragee eval rule
@@ -155,8 +161,12 @@ export const expectDragee = (root: Dragee, dragee: Dragee, errorMsg: string, eva
  * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
-export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: string, evalFn: (dragees: Dragee[]) => boolean): RuleResult =>
-    evalFn(dependancies) ? successful() : failed(root, errorMsg)
+export const expectDragees = (
+    root: Dragee,
+    dependancies: Dragee[],
+    errorMsg: string,
+    evalFn: (dragees: Dragee[]) => boolean
+): RuleResult => (evalFn(dependancies) ? successful() : failed(root, errorMsg));
 
 /**
  * Expects multiple dragees to follow a unique dragee eval rule
@@ -166,5 +176,9 @@ export const expectDragees = (root: Dragee, dependancies: Dragee[], errorMsg: st
  * @param evalFn Eval function
  * @returns RuleResult success/fail
  */
-export const multipleExpectDragees = (root: Dragee, dragees: Dragee[], errorMsg: string, evalFn: (dragee: Dragee) => boolean): RuleResult[] =>
-    dragees.map(d => evalFn(d) ? successful() : failed(root, errorMsg))
+export const multipleExpectDragees = (
+    root: Dragee,
+    dragees: Dragee[],
+    errorMsg: string,
+    evalFn: (dragee: Dragee) => boolean
+): RuleResult[] => dragees.map(d => (evalFn(d) ? successful() : failed(root, errorMsg)));

@@ -1,4 +1,4 @@
-export { generateId } from "./utils/id-generation.utils.ts";
+export { generateId } from './utils/id-generation.utils.ts';
 
 export enum DependencyType {
     CONSTRUCTOR = 'constructor',
@@ -6,15 +6,14 @@ export enum DependencyType {
     METHOD_PARAM = 'method_param',
     METHOD_RETURN = 'method_return'
 }
-export interface Dependency extends Record<string, DependencyType> {
-}
+export interface Dependency extends Record<string, DependencyType> {}
 export interface Dragee {
-    name: string,
-    profile: string,
-    depends_on: Dependency[]
+    name: string;
+    profile: string;
+    depends_on: Dependency[];
 }
 
 export interface DrageeDependency {
-    root: Dragee,
-    dependencies: Dragee[]
+    root: Dragee;
+    dependencies: Dragee[];
 }
