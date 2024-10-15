@@ -1,0 +1,9 @@
+{
+    "extends": "../tsconfig.json",
+    "include": ["../**/*"],
+    "compilerOptions": {
+        "paths": {
+            "@dragee-io/type": ["../common/"]
+        }
+    }
+}

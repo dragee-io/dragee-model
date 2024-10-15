@@ -1,0 +1,22 @@
+{
+    "name": "@dragee-io/asserter-type",
+    "module": "index.ts",
+    "type": "module",
+    "version": "0.0.4",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/MichaelBernasinski/dragee-model.git",
+        "directory": "asserter"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@biomejs/biome": "^1.9.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5.5.0",
+        "typedoc": "^0.26.7"
+    },
+    "dependencies": {
+        "@dragee-io/type": "workspace:*"
+    }
+}
