@@ -1,33 +1,33 @@
 {
-  "compilerOptions": {
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    "compilerOptions": {
+        "lib": ["ESNext"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "jsx": "react-jsx",
+        "allowJs": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": false,
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "noEmit": false,
 
-    /* Linting */
-    "skipLibCheck": true,
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
+        /* Linting */
+        "skipLibCheck": true,
+        "strict": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
 
-    /* Multi-package */
-    "composite": true,
-    "declarationMap": true,
-    "paths": {
-      "@dragee-io/asserter-type": ["./asserter/*"],
-      "@dragee-io/grapher-type": ["./grapher/*"],
-      "@dragee-io/type": ["./common/*"]
+        /* Multi-package */
+        "composite": true,
+        "declarationMap": true,
+        "paths": {
+            "@dragee-io/asserter-type": ["./asserter/*"],
+            "@dragee-io/grapher-type": ["./grapher/*"],
+            "@dragee-io/type": ["./common/*"]
+        }
     }
-  }
 }

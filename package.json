@@ -1,13 +1,9 @@
 {
-  "private": true,
-	"scripts": {
-		"format": "biome format --write",
-		"lint": "biome lint --write",
-		"check": "biome check --write"
-	},
-  "workspaces": [
-    "asserter",
-    "common",
-    "grapher"
-  ]
+    "private": true,
+    "scripts": {
+        "format": "biome format --write",
+        "lint": "biome lint --write",
+        "check": "biome check --write"
+    },
+    "workspaces": ["asserter", "common", "grapher"]
 }
