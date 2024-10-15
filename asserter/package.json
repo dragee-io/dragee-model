@@ -5,7 +5,7 @@
     "version": "0.0.4",
     "repository": {
         "type": "git",
-        "url": "https://github.com/MichaelBernasinski/dragee-model.git",
+        "url": "https://github.com/dragee-io/dragee-model.git",
         "directory": "asserter"
     },
     "devDependencies": {
