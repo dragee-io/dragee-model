@@ -92,18 +92,23 @@ export type Asserter = {
  * @returns Report of dragees testing
  */
 export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Dragee[]): Report => {
-    const rulesResultsErrors = asserter.rules
-        .flatMap(rule =>
-            rule.handler(dragees).map(result => {
-                result.ruleId = rule.id;
-                return result;
-            })
-        )
+    const rulesResults = asserter.rules.flatMap(rule =>
+        rule.handler(dragees).map(result => {
+            result.ruleId = rule.id;
+            return result;
+        })
+    );
+
+    const rulesResultsErrors = rulesResults
         .filter((result): result is FailedRuleResult => !result.pass)
         .map(result => {
             result.error.ruleId = result.ruleId;
             return result.error;
         });
+
+    const rulesResultsPassed = rulesResults.filter(
+        (result): result is SuccessfulRuleResult => result.pass
+    );
 
     return {
         pass: rulesResultsErrors.length === 0,
@@ -111,7 +116,7 @@ export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Drag
         errors: rulesResultsErrors,
         stats: {
             errorsCount: rulesResultsErrors.length,
-            passCount: asserter.rules.length - rulesResultsErrors.length,
+            passCount: rulesResultsPassed.length,
             rulesCount: asserter.rules.length
         }
     };
