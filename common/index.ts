@@ -1,4 +1,7 @@
 export { generateId } from './utils/id-generation.utils.ts';
+export { type Result, ok, ko } from './fp/result.model.ts';
+export type { Nullable, Maybe, AsyncNullable, OrElse, OrElseGet } from './fp/maybe.model.ts';
+export { none, some } from './fp/maybe.model.ts';
 
 export enum DependencyType {
     CONSTRUCTOR = 'constructor',
