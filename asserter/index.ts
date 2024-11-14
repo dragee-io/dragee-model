@@ -61,6 +61,19 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
 };
 
 /**
+ * This function scans the directory for rule files
+ * @param dir the directory to scan
+ * @returns an iterator of the files matching the rule pattern
+ */
+function scanRuleFiles(dir: string) {
+    return new Glob('*.rule.ts').scanSync({
+        cwd: dir,
+        absolute: true,
+        onlyFiles: true
+    });
+}
+
+/**
  * Rules scanning in asserter directory
  * Adds a generated ID for every rule
  * @param namespace asserter namespace
@@ -68,24 +81,16 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
  * @returns rules found in dir
  */
 export const findRules = (namespace: string, dir: string): Rule[] => {
-    const scan = new Glob('*.rule.ts').scanSync({
-        cwd: dir,
-        absolute: true,
-        onlyFiles: true
-    });
+    const files = scanRuleFiles(dir);
 
-    return Array.from(scan)
+    return Array.from(files)
         .map(file => require(file).default)
         .filter((rule): rule is DeclaredRule => rule)
         .map(rule => declaredRuleToRule(namespace, rule));
 };
 
 export function findRule(namespace: string, dir: string, ruleName: string): Rule | undefined {
-    const files = new Glob('*.rule.ts').scanSync({
-        cwd: dir,
-        absolute: true,
-        onlyFiles: true
-    });
+    const files = scanRuleFiles(dir);
 
     // Might be improved in case of multiple rules containing the same name
     const file = Array.from(files).find(file => file.includes(ruleName));
