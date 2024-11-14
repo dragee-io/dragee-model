@@ -84,8 +84,7 @@ export const findRules = (namespace: string, dir: string): Rule[] => {
     const files = scanRuleFiles(dir);
 
     return Array.from(files)
-        .map(file => require(file).default)
-        .filter((rule): rule is DeclaredRule => rule)
+        .map(file => require(file).default as DeclaredRule)
         .map(rule => declaredRuleToRule(namespace, rule));
 };
 
