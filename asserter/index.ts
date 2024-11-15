@@ -61,6 +61,19 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
 };
 
 /**
+ * This function scans the directory for rule files
+ * @param dir the directory to scan
+ * @returns an iterator of the files matching the rule pattern
+ */
+function scanRuleFiles(dir: string) {
+    return new Glob('*.rule.ts').scanSync({
+        cwd: dir,
+        absolute: true,
+        onlyFiles: true
+    });
+}
+
+/**
  * Rules scanning in asserter directory
  * Adds a generated ID for every rule
  * @param namespace asserter namespace
@@ -68,21 +81,31 @@ export const directDependencies = (root: Dragee, allDragees: Dragee[]) => {
  * @returns rules found in dir
  */
 export const findRules = (namespace: string, dir: string): Rule[] => {
-    const scan = new Glob('*.rule.ts').scanSync({
-        cwd: dir,
-        absolute: true,
-        onlyFiles: true
-    });
+    const files = scanRuleFiles(dir);
 
-    return Array.from(scan)
-        .map(file => require(file).default)
-        .filter((rule): rule is DeclaredRule => rule)
+    return Array.from(files)
+        .map(file => require(file).default as DeclaredRule)
         .map(rule => declaredRuleToRule(namespace, rule));
 };
+
+export function findRule(namespace: string, dir: string, ruleName: string): Rule | undefined {
+    const files = scanRuleFiles(dir);
+
+    // Might be improved in case of multiple rules containing the same name
+    const file = Array.from(files).find(file => file.includes(ruleName));
+
+    if (!file) {
+        return undefined;
+    }
+
+    const rule = require(file).default;
+    return declaredRuleToRule(namespace, rule);
+}
 
 export type Asserter = {
     readonly namespace: string;
     readonly rules: Rule[];
+    rule: (file: string) => Rule | undefined;
 };
 
 /**
@@ -121,6 +144,56 @@ export const asserterHandler: AssertHandler = (asserter: Asserter, dragees: Drag
         }
     };
 };
+
+/**
+ * Tests dragees list against the rules of an asserter, and builds a result report
+ * @param asserter Asserter including dragees rules
+ * @param dragees Dragees to test against the asserter rules
+ * @returns Report of dragees testing
+ */
+export function generateReportForRule(asserter: Asserter, dragees: Dragee[], file: string): Report {
+    const rule = asserter.rule(file);
+
+    if (!rule) {
+        return {
+            pass: true,
+            namespace: asserter.namespace,
+            errors: [],
+            stats: {
+                errorsCount: 0,
+                passCount: 0,
+                rulesCount: 0
+            }
+        };
+    }
+
+    const ruleResults = rule.handler(dragees).map(result => {
+        result.ruleId = rule.id;
+        return result;
+    });
+
+    const rulesResultsErrors = ruleResults
+        .filter((result): result is FailedRuleResult => !result.pass)
+        .map(result => {
+            result.error.ruleId = result.ruleId;
+            return result.error;
+        });
+
+    const rulesResultsPassed = ruleResults.filter(
+        (result): result is SuccessfulRuleResult => result.pass
+    );
+
+    return {
+        pass: rulesResultsErrors.length === 0,
+        namespace: asserter.namespace,
+        errors: rulesResultsErrors,
+        stats: {
+            errorsCount: rulesResultsErrors.length,
+            passCount: rulesResultsPassed.length,
+            rulesCount: asserter.rules.length
+        }
+    };
+}
 
 /**
  * Rule severity
