@@ -1,4 +1,10 @@
 {
     "extends": "../tsconfig.json",
     "include": ["../**/*"],
+    "compilerOptions": {
+        "paths": {
+            "@dragee-io/type": ["../common/"],
+            "@dragee-io/asserter-type": ["../asserter/"]
+        }
+    }
 }
