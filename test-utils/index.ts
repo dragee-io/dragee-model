@@ -1,8 +1,6 @@
 import { expect, test } from 'bun:test';
-
-import { generateReportForRule } from '@dragee-io/asserter-type';
-import type { Asserter } from '@dragee-io/asserter-type';
-import type { Dragee } from '@dragee-io/type';
+import { type Asserter, generateReportForRule } from '../asserter';
+import type { Dragee } from '../common';
 
 export interface TestObject {
     dragees: Dragee[];
