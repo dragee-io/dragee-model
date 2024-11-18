@@ -13,3 +13,7 @@ Types and helpers for Asserters.
 ### @dragee-io/grapher-type
 
 Types and helpers for Graphers.
+
+### @dragee-io/tests-utils
+
+Utils for asserters/graphers approval testing.
