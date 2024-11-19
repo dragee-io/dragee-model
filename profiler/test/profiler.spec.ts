@@ -1,9 +1,25 @@
 import { describe, it, expect } from 'bun:test';
 import type { Dragee } from '@dragee-io/type';
+import type { Equals } from '@dragee-io/test-utils';
 
-import { generateProfilerWith } from '../index.ts';
+import { generateProfilerWith, type CustomProfiler } from '../index.ts';
 
 describe('Profiler generation', () => {
+    it('should have an equal type for the generated profiler', () => {
+        const profiles = ['namespace/default'] as const;
+
+        type ExpectedProfiler = {
+            'namespace/default': {
+                findIn: (dragees: Dragee[]) => Dragee[];
+                is: (profile: string) => boolean;
+            };
+        };
+
+        // FIXME: It looks like bun doens'nt support type assertions. You can use the result inferred type to know whether the type is correct or not
+        type AreTheSame = Equals<ExpectedProfiler, CustomProfiler<(typeof profiles)[number]>>;
+        //   ^?
+    });
+
     it('should generate a profiler with the correct profiles', () => {
         const defaultProfile = 'namespace/default';
         const testProfile = 'namespace/test';
