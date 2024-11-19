@@ -7,5 +7,5 @@
         "lint": "biome lint --write",
         "check": "biome check --write"
     },
-    "workspaces": ["asserter", "common", "grapher"]
+    "workspaces": ["asserter", "common", "grapher", "profiler", "test-utils"]
 }
