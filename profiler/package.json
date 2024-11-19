@@ -1,0 +1,20 @@
+{
+    "name": "@dragee-io/profiler",
+    "module": "index.ts",
+    "type": "module",
+    "version": "0.0.4",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dragee-io/dragee-model.git",
+        "directory": "profiler"
+    },
+    "devDependencies": {
+        "@dragee-io/test-utils": "workspace:*",
+        "@types/bun": "latest",
+        "@biomejs/biome": "^1.9.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5.5.0",
+        "typedoc": "^0.26.7"
+    }
+}

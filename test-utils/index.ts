@@ -1,6 +1,8 @@
 import { expect, test } from 'bun:test';
-import { type Asserter, generateReportForRule } from '../asserter';
-import type { Dragee } from '../common';
+
+import { generateReportForRule } from '@dragee-io/asserter-type';
+import type { Dragee } from '@dragee-io/type';
+import type { Asserter } from '@dragee-io/asserter-type';
 
 export interface TestObject {
     dragees: Dragee[];
@@ -52,3 +54,12 @@ export function createRuleFailedOnAsserter(
         });
     };
 }
+
+/**
+ * Custom type to check if two types are equals
+ */
+export type Equals<Left, Right> = (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right
+    ? 1
+    : 2
+    ? true
+    : false;
