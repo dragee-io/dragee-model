@@ -54,3 +54,12 @@ export function createRuleFailedOnAsserter(
         });
     };
 }
+
+/**
+ * Custom type to check if two types are equals
+ */
+export type Equals<Left, Right> = (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right
+    ? 1
+    : 2
+    ? true
+    : false;
