@@ -7,6 +7,16 @@ export type CustomProfiler<TProfile extends string> = {
     };
 };
 
+/**
+ * This function creates custom a profiler based on the given profiles and a function to check if a dragee match a profile
+ *
+ * Usage:
+ * ```ts
+ * const [profiler, profileOf] = generateProfilerWith(['namespace/profile1', 'namespace/profile2']);
+ * ```
+ * @param profiles an array of profiles
+ * @returns an tuple of a profiler and a function to check if a dragee match a profile
+ */
 export function generateProfilerWith<TProfile extends string>(
     profiles: readonly TProfile[]
 ): [CustomProfiler<TProfile>, (dragees: Dragee, ...profilesToFilterOn: TProfile[]) => boolean] {
