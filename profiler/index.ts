@@ -23,8 +23,7 @@ export function generateProfilerWith<TProfile extends string>(
     const profiler = createProfiler<TProfile>(profiles);
 
     function profileOf(dragee: Dragee, ...profilesToFilterOn: TProfile[]): boolean {
-        // TODO: improve this with direct some
-        return profilesToFilterOn.map(pf => profiler[pf].is(dragee.profile)).some(b => b);
+        return profilesToFilterOn.some(pf => profiler[pf].is(dragee.profile));
     }
 
     return [profiler, profileOf];
