@@ -5,7 +5,35 @@
     "scripts": {
         "format": "biome format --write",
         "lint": "biome lint --write",
-        "check": "biome check --write"
+        "check": "biome check --write",
+        "build": "bun run build.ts",
+        "build:force": "rm -rf ./dist && bun run build.ts"
     },
-    "workspaces": ["asserter", "common", "grapher", "profiler", "test-utils"]
+    "exports": {
+        "./asserter": {
+            "bun": "./asserter/index.ts",
+            "import": "./dist/asserter/index.js"
+        },
+        "./profiler": {
+            "bun": "./profiler/index.ts",
+            "import": "./dist/profiler/index.js"
+        },
+        "./grapher": {
+            "bun": "./grapher/index.ts",
+            "import": "./dist/grapher/index.js"
+        },
+        "./common": {
+            "bun": "./common/index.ts",
+            "import": "./dist/common/index.js"
+        },
+        "./test-utils": {
+            "bun": "./test-utils/index.ts",
+            "import": "./dist/test-utils/index.js"
+        }
+    },
+    "trustedDependencies": ["@biomejs/biome"],
+    "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@types/bun": "^1.1.14"
+    }
 }

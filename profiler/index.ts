@@ -1,4 +1,4 @@
-import type { Dragee } from '@dragee-io/type';
+import type { Dragee } from '../common';
 
 export type CustomProfiler<TProfile extends string> = {
     [profile in TProfile]: {
