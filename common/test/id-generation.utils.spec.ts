@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { generateId } from '@dragee-io/type/utils/id-generation.utils.ts';
+import { generateId } from '../utils/id-generation.utils';
 
 describe('Generate ID from label, for rules and graphs', () => {
     test('assert with empty namespace and label', async () => {

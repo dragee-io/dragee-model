@@ -23,12 +23,6 @@
 
         /* Multi-package */
         "composite": true,
-        "declarationMap": true,
-        "paths": {
-            "@dragee-io/asserter-type": ["./asserter/*"],
-            "@dragee-io/grapher-type": ["./grapher/*"],
-            "@dragee-io/test-utils": ["./test-utils/*"],
-            "@dragee-io/type": ["./common/*"]
-        }
+        "declarationMap": true
     }
 }
