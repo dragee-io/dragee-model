@@ -29,7 +29,8 @@
         "./test-utils": {
             "bun": "./test-utils/index.ts",
             "import": "./dist/test-utils/index.js"
-        }
+        },
+        "./tsconfig.bun": "./tsconfig.bun.json"
     },
     "trustedDependencies": ["@biomejs/biome"],
     "devDependencies": {
