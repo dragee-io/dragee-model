@@ -38,6 +38,16 @@ In your package that uses the `@dragee-io/type` package, you must specify in the
 }
 ```
 
+**OR**
+
+by extending the tsconfig.json file of the package:
+
+```json
+{
+    "extends": "@dragee-io/type/tsconfig.bun",
+}
+```
+
 This is required to inform typescript that it must resolve the typescript files in the package under a specific condition.
 
 ---
