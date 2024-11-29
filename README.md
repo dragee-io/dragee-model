@@ -17,3 +17,7 @@ Types and helpers for Graphers.
 ### @dragee-io/tests-utils
 
 Utils for asserters/graphers approval testing.
+
+### @dragee-io/profiler
+
+Profiler for asserters/graphers.
