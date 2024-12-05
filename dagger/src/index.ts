@@ -1,12 +1,12 @@
-import { dag, Container, Directory, object, func } from '@dagger.io/dagger';
+import { dag, type Container, type Directory, object, func } from '@dagger.io/dagger';
 
-const PACKAGE_JSON = "package.json";
-const BUN_LOCKB = "bun.lockb";
+const PACKAGE_JSON = 'package.json';
+const BUN_LOCKB = 'bun.lockb';
 
 @object()
 export class DrageeModel {
     @func()
-    bun_container(bun_version: string = 'latest'): Container {
+    bun_container(bun_version = 'latest'): Container {
         // might be useful to check if the version is in a valid format
         return dag.container().from(`oven/bun:${bun_version}`);
     }
@@ -15,7 +15,7 @@ export class DrageeModel {
     install_dependencies(source: Directory) {
         const package_json = source.file(PACKAGE_JSON);
         const lockb_file = source.file(BUN_LOCKB);
-        
+
         return this.bun_container()
             .withWorkdir('/app')
             .withFiles('/app', [package_json, lockb_file])
@@ -36,42 +36,58 @@ export class DrageeModel {
      */
     @func()
     async test(source: Directory) {
-        const tested_app = this.app_container(source)
-            .withExec(['bun', 'test'])
+        const tested_app = this.app_container(source).withExec(['bun', 'test']);
 
-        console.log("Tests output:", await tested_app.stdout());
-        console.log("Tests error:", await tested_app.stderr());
+        console.log('Tests output:', await tested_app.stdout());
+        console.log('Tests error:', await tested_app.stderr());
 
         return tested_app;
     }
 
+    /**
+     * WIP for now, seems there's an error on linting due to biome's dependencies
+     * @param source 
+     * @returns 
+     */
     @func()
-    bun_installed(bun_version?: string): Container {
-        const bun_binary_location = 'https://bun.sh/install';
-        let bun_install_command: string;
-        if (bun_version) {
-            // might be useluf to check if the version is in a valid format
-            bun_install_command = `${bun_binary_location} | bash -s "bun-${bun_version}"`;
-        } else {
-            bun_install_command = `${bun_binary_location} | bash`;
-        }
+    async lint(source: Directory) {
+        const linted_app = this.app_container(source).withExec(['bun', 'lint']);
 
-        console.info(`Installing bun with command: ${bun_install_command}`);
+        console.log('Lint output:', await linted_app.stdout());
+        console.log('Lint error:', await linted_app.stderr());
 
-        return (
-            dag
-                .container()
-                .from('alpine:latest')
-                .withExec(['apk', 'add', '--no-cache', 'bash', 'curl', 'unzip'])
-                .withExec(['curl', '-fsSL', bun_binary_location, '-o', 'install.sh'])
-                .withExec(['ls'])
-                .withExec(['chmod', '+x', 'install.sh'])
-                .withExec(['./install.sh'])
-                // .withExec([`curl -fsSL ${bun_binary_location}`])
-                .withEnvVariable('PATH', `/root/.bun/bin:$PATH`)
-                .withExec(['bun'])
-        );
+        return linted_app;
     }
+
+    
+
+    // @func()
+    // bun_installed(bun_version?: string): Container {
+    //     const bun_binary_location = 'https://bun.sh/install';
+    //     let bun_install_command: string;
+    //     if (bun_version) {
+    //         // might be useluf to check if the version is in a valid format
+    //         bun_install_command = `${bun_binary_location} | bash -s "bun-${bun_version}"`;
+    //     } else {
+    //         bun_install_command = `${bun_binary_location} | bash`;
+    //     }
+
+    //     console.info(`Installing bun with command: ${bun_install_command}`);
+
+    //     return (
+    //         dag
+    //             .container()
+    //             .from('alpine:latest')
+    //             .withExec(['apk', 'add', '--no-cache', 'bash', 'curl', 'unzip'])
+    //             .withExec(['curl', '-fsSL', bun_binary_location, '-o', 'install.sh'])
+    //             .withExec(['ls'])
+    //             .withExec(['chmod', '+x', 'install.sh'])
+    //             .withExec(['./install.sh'])
+    //             // .withExec([`curl -fsSL ${bun_binary_location}`])
+    //             .withEnvVariable('PATH', '/root/.bun/bin:$PATH')
+    //             .withExec(['bun'])
+    //     );
+    // }
 
     // @func()
     // test() {
