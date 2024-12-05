@@ -46,8 +46,8 @@ export class DrageeModel {
 
     /**
      * WIP for now, seems there's an error on linting due to biome's dependencies
-     * @param source 
-     * @returns 
+     * @param source
+     * @returns
      */
     @func()
     async lint(source: Directory) {
@@ -59,7 +59,15 @@ export class DrageeModel {
         return linted_app;
     }
 
-    
+    @func()
+    async build(source: Directory) {
+        const built_app = this.app_container(source).withExec(['bun', 'run', 'build']);
+
+        console.log('Build output:', await built_app.stdout());
+        console.log('Build error:', await built_app.stderr());
+
+        return built_app;
+    }
 
     // @func()
     // bun_installed(bun_version?: string): Container {
