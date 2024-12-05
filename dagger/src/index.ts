@@ -1,11 +1,48 @@
 import { dag, Container, Directory, object, func } from '@dagger.io/dagger';
 
+const PACKAGE_JSON = "package.json";
+const BUN_LOCKB = "bun.lockb";
+
 @object()
 export class DrageeModel {
     @func()
     bun_container(bun_version: string = 'latest'): Container {
         // might be useful to check if the version is in a valid format
         return dag.container().from(`oven/bun:${bun_version}`);
+    }
+
+    @func()
+    install_dependencies(source: Directory) {
+        const package_json = source.file(PACKAGE_JSON);
+        const lockb_file = source.file(BUN_LOCKB);
+        
+        return this.bun_container()
+            .withWorkdir('/app')
+            .withFiles('/app', [package_json, lockb_file])
+            .withExec(['bun', 'install']);
+    }
+
+    @func()
+    app_container(source: Directory) {
+        return this.install_dependencies(source)
+            .withWorkdir('/app')
+            .withMountedDirectory('/app', source);
+    }
+
+    /**
+     * It runs the tests of the project
+     * @param source The directory containing the project to test
+     * @returns a container that runs the tests of the project
+     */
+    @func()
+    async test(source: Directory) {
+        const tested_app = this.app_container(source)
+            .withExec(['bun', 'test'])
+
+        console.log("Tests output:", await tested_app.stdout());
+        console.log("Tests error:", await tested_app.stderr());
+
+        return tested_app;
     }
 
     @func()
