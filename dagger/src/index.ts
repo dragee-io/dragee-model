@@ -69,6 +69,29 @@ export class DrageeModel {
         return built_app;
     }
 
+    @func()
+    async publish(source: Directory) {
+        //TODO
+    }
+
+    get_repository(url: string, branch = "main") {
+        // TODO
+        const repo = dag.git(url).branch(branch)
+
+        return repo
+        // return {files: dag.git(url).head().tree(),
+        //     tags: await dag.git(url).tags(),
+        // }
+        // const tags = (await dag.git(url).tags())
+        // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
+    }
+
+    get_repository(url: string, branch = 'main') {
+        const repo = dag.git(url).branch(branch);
+
+        return repo;
+    }
+
     // @func()
     // bun_installed(bun_version?: string): Container {
     //     const bun_binary_location = 'https://bun.sh/install';
