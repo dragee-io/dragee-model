@@ -22,7 +22,6 @@
         "forceConsistentCasingInFileNames": true,
 
         /* Multi-package */
-        "composite": true,
         "declarationMap": true
     }
 }
