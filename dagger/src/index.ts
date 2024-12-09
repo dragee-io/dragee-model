@@ -115,8 +115,6 @@ export class DrageeModel {
                 cause: error
             });
         }
-
-        return app;
     }
 
     // @func()
