@@ -40,10 +40,6 @@ export class DrageeModel {
             .withWorkdir('/app')
             .withMountedDirectory('/app', source)
             .withMountedDirectory('/app/node_modules', node_modules);
-
-        return this.install_dependencies(source)
-            .withWorkdir('/app')
-            .withMountedDirectory('/app', source);
     }
 
     /**
