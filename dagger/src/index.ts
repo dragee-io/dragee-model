@@ -22,8 +22,25 @@ export class DrageeModel {
             .withExec(['bun', 'install']);
     }
 
+    // install_dependencies_on(container: Container, source: Directory) {
+    //     const package_json = source.file(PACKAGE_JSON);
+    //     const lockb_file = source.file(BUN_LOCKB);
+
+    //     return container
+    //         .withWorkdir('/app')
+    //         .withFiles('/app', [package_json, lockb_file])
+    //         .withExec(['bun', 'install']);
+    // }
+
     @func()
-    app_container(source: Directory) {
+    mount_app_with(source: Directory) {
+        const node_modules = this.install_dependencies(source).directory('/app/node_modules');
+
+        return this.bun_container()
+            .withWorkdir('/app')
+            .withMountedDirectory('/app', source)
+            .withMountedDirectory('/app/node_modules', node_modules);
+
         return this.install_dependencies(source)
             .withWorkdir('/app')
             .withMountedDirectory('/app', source);
@@ -35,33 +52,35 @@ export class DrageeModel {
      * @returns a container that runs the tests of the project
      */
     @func()
-    async test(source: Directory) {
-        const tested_app = this.app_container(source).withExec(['bun', 'test']);
+    // async test(source: Directory) {
+    //     const tested_app = this.app_container(source).withExec(['bun', 'test']);
+    async test(app: Container) {
+        const tested_app = app.withExec(['bun', 'test']);
 
-        console.log('Tests output:', await tested_app.stdout());
-        console.log('Tests error:', await tested_app.stderr());
+        await tested_app.stdout();
+        await tested_app.stderr();
 
         return tested_app;
     }
 
     /**
-     * WIP for now, seems there's an error on linting due to biome's dependencies
+     * This function runs the lint of the project
      * @param source
      * @returns
      */
     @func()
-    async lint(source: Directory) {
-        const linted_app = this.app_container(source).withExec(['bun', 'lint']);
+    async lint(app: Container) {
+        const linted_app = app.withExec(['bun', 'lint']);
 
-        console.log('Lint output:', await linted_app.stdout());
-        console.log('Lint error:', await linted_app.stderr());
+        await linted_app.stdout();
+        await linted_app.stderr();
 
         return linted_app;
     }
 
     @func()
     async build(source: Directory) {
-        const built_app = this.app_container(source).withExec(['bun', 'run', 'build']);
+        const built_app = this.mount_app_with(source).withExec(['bun', 'run', 'build']);
 
         console.log('Build output:', await built_app.stdout());
         console.log('Build error:', await built_app.stderr());
@@ -69,16 +88,42 @@ export class DrageeModel {
         return built_app;
     }
 
+    /**
+     * This function runs the lint and test of the project on a pull request trigger
+     * @param url the repository url (it can either be a http or a git url)
+     * @param {string} [branch="main"] the branch to use - defaults to `main`
+     * @returns the linted and tested app
+     */
     @func()
-    async publish(source: Directory) {
-        //TODO
+    async on_pull_request(url: string, branch = 'main') {
+        const repository_files = this.get_repository(url, branch).tree();
+
+        const app = this.mount_app_with(repository_files);
+
+        try {
+            await this.lint(app);
+        } catch (error) {
+            throw new Error('The linter failed', {
+                cause: error
+            });
+        }
+
+        try {
+            await this.test(app);
+        } catch (error) {
+            throw new Error('Tests failed', {
+                cause: error
+            });
+        }
+
+        return app;
     }
 
-    get_repository(url: string, branch = "main") {
-        // TODO
-        const repo = dag.git(url).branch(branch)
+    // @func()
+    async publish(source: Directory) {
+        //TODO
 
-        return repo
+        // pulling the git tags
         // return {files: dag.git(url).head().tree(),
         //     tags: await dag.git(url).tags(),
         // }
