@@ -1,4 +1,4 @@
-import { dag, type Container, type Directory, object, func } from '@dagger.io/dagger';
+import { dag, type GitRef, type Container, type Directory, object, func } from '@dagger.io/dagger';
 
 const PACKAGE_JSON = 'package.json';
 const BUN_LOCKB = 'bun.lockb';
@@ -12,7 +12,7 @@ export class DrageeModel {
     }
 
     @func()
-    install_dependencies(source: Directory) {
+    install_dependencies(source: Directory): Container {
         const package_json = source.file(PACKAGE_JSON);
         const lockb_file = source.file(BUN_LOCKB);
 
@@ -33,7 +33,7 @@ export class DrageeModel {
     // }
 
     @func()
-    mount_app_with(source: Directory) {
+    mount_app_with(source: Directory): Container {
         const node_modules = this.install_dependencies(source).directory('/app/node_modules');
 
         return this.bun_container()
@@ -50,7 +50,7 @@ export class DrageeModel {
     @func()
     // async test(source: Directory) {
     //     const tested_app = this.app_container(source).withExec(['bun', 'test']);
-    async test(app: Container) {
+    async test(app: Container): Promise<Container> {
         const tested_app = app.withExec(['bun', 'test']);
 
         await tested_app.stdout();
@@ -65,7 +65,7 @@ export class DrageeModel {
      * @returns
      */
     @func()
-    async lint(app: Container) {
+    async lint(app: Container): Promise<Container> {
         const linted_app = app.withExec(['bun', 'lint']);
 
         await linted_app.stdout();
@@ -75,26 +75,31 @@ export class DrageeModel {
     }
 
     @func()
-    async build(source: Directory) {
+    async build(source: Directory): Promise<Container> {
         const built_app = this.mount_app_with(source).withExec(['bun', 'run', 'build']);
 
-        console.log('Build output:', await built_app.stdout());
-        console.log('Build error:', await built_app.stderr());
+        await built_app.stdout();
+        await built_app.stderr();
 
         return built_app;
     }
 
     /**
      * This function runs the lint and test of the project on a pull request trigger
-     * @param url the repository url (it can either be a http or a git url)
-     * @param {string} [branch="main"] the branch to use - defaults to `main`
+     * @param url - the repository url (it can either be a http or a git url)
+     * @param branch - the branch to use - defaults to `main`
      * @returns the linted and tested app
      */
     @func()
-    async on_pull_request(url: string, branch = 'main') {
+    async on_pull_request(url: string, branch = 'main'): Promise<void> {
         const repository_files = this.get_repository(url, branch).tree();
 
-        const app = this.mount_app_with(repository_files);
+        await this.lint_and_test(repository_files);
+    }
+
+    @func()
+    async lint_and_test(source: Directory): Promise<Container> {
+        const app = this.mount_app_with(source);
 
         try {
             await this.lint(app);
@@ -111,21 +116,23 @@ export class DrageeModel {
                 cause: error
             });
         }
+
+        return app;
     }
 
     // @func()
-    async publish(source: Directory) {
-        //TODO
+    // async publish(source: Directory) {
+    //     //TODO
 
-        // pulling the git tags
-        // return {files: dag.git(url).head().tree(),
-        //     tags: await dag.git(url).tags(),
-        // }
-        // const tags = (await dag.git(url).tags())
-        // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
-    }
+    //     // pulling the git tags
+    //     // return {files: dag.git(url).head().tree(),
+    //     //     tags: await dag.git(url).tags(),
+    //     // }
+    //     // const tags = (await dag.git(url).tags())
+    //     // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
+    // }
 
-    get_repository(url: string, branch = 'main') {
+    get_repository(url: string, branch = 'main'): GitRef {
         const repo = dag.git(url).branch(branch);
 
         return repo;
