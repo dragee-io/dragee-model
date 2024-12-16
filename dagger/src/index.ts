@@ -1,4 +1,4 @@
-import { dag, type GitRef, type Container, type Directory, object, func } from '@dagger.io/dagger';
+import { dag, type File, type GitRef, type Container, Directory, object, func } from '@dagger.io/dagger';
 
 const PACKAGE_JSON = 'package.json';
 const BUN_LOCKB = 'bun.lockb';
@@ -8,7 +8,13 @@ export class DrageeModel {
     @func()
     bun_container(bun_version = 'latest'): Container {
         // might be useful to check if the version is in a valid format
+        // check root privileges in the container
         return dag.container().from(`oven/bun:${bun_version}`);
+    }
+
+    @func()
+    node_container(node_version = 'current-alpine3.21'): Container {
+        return dag.container().from(`node:${node_version}`);
     }
 
     @func()
@@ -97,6 +103,11 @@ export class DrageeModel {
         await this.lint_and_test(repository_files);
     }
 
+    /**
+     * This function runs the lint and test of the project (used by `on_pull_request` but can be used to test local changes)
+     * @param source the source directory
+     * @returns the linted and tested app container
+     */
     @func()
     async lint_and_test(source: Directory): Promise<Container> {
         const app = this.mount_app_with(source);
@@ -120,17 +131,41 @@ export class DrageeModel {
         return app;
     }
 
-    // @func()
-    // async publish(source: Directory) {
-    //     //TODO
+    @func()
+    async on_publish(git_url?: string, source?: Directory): Promise<Container> {
+        //TODO
+        const built_app = await this.build(source);
+        // might be nice to kind of "compose" the directory to select what 
+        // will be published rather than everything that is not excluded by the .gitignore
+        const built_files = built_app.directory(".")
 
-    //     // pulling the git tags
-    //     // return {files: dag.git(url).head().tree(),
-    //     //     tags: await dag.git(url).tags(),
-    //     // }
-    //     // const tags = (await dag.git(url).tags())
-    //     // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
-    // }
+        const latest_tag = await this.get_latest_tag(git_url);
+
+        const updated_version_app = this.update_app_version(latest_tag, built_files);
+
+        const published_app = await this.publish(updated_version_app);
+        
+        return updated_version_app;
+        // pulling the git tags
+        // return {files: dag.git(url).head().tree(),
+        //     tags: await dag.git(url).tags(),
+        // }
+        // const tags = (await dag.git(url).tags())
+        // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
+    }
+
+    @func()
+    publish(app: Container): Container {
+        return app.withExec(["npm", "publish"]);
+    }
+
+    @func()
+    update_app_version(version: string, source: Directory): Container {
+        return this.node_container()
+            .withDirectory('/app', source)
+            .withWorkdir('/app')
+            .withExec(["npm", "version", version, "--commit-hooks", "false", "--git-tag-version", "false"]);
+    }
 
     get_repository(url: string, branch = 'main'): GitRef {
         const repo = dag.git(url).branch(branch);
@@ -138,6 +173,13 @@ export class DrageeModel {
         return repo;
     }
 
+    @func()
+    async get_latest_tag(url: string): Promise<string> {
+        const tags = await dag.git(url).tags()
+
+        return tags.at(-1)
+    }
+    
     // @func()
     // bun_installed(bun_version?: string): Container {
     //     const bun_binary_location = 'https://bun.sh/install';
