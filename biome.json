@@ -1,7 +1,7 @@
 {
     "$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
     "files": {
-        "ignore": ["**/bower_components/", "**/node_modules/"],
+        "ignore": ["**/bower_components/", "**/node_modules/", "**/dist/", "dagger/sdk/**/*"],
         "include": ["**/*.ts", "**/*.json"]
     },
     "formatter": {
