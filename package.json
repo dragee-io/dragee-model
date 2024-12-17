@@ -1,6 +1,5 @@
 {
-    "private": true,
-    "name": "@dragee-io/type",
+    "name": "@dragee-io/test-name",
     "type": "module",
     "scripts": {
         "format": "biome format --write",
