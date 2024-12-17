@@ -1,4 +1,12 @@
-import { dag, type GitRef, type Container, type Directory, object, func, type Secret } from '@dagger.io/dagger';
+import {
+    dag,
+    type GitRef,
+    type Container,
+    type Directory,
+    object,
+    func,
+    type Secret
+} from '@dagger.io/dagger';
 
 const PACKAGE_JSON = 'package.json';
 const BUN_LOCKB = 'bun.lockb';
@@ -11,7 +19,7 @@ export class DrageeModel {
         // FIXME: check root privileges in the container
         return dag.container().from(`oven/bun:${bun_version}`);
     }
-    
+
     @func()
     node_container(node_version = 'current-alpine3.21'): Container {
         // FIXME: check root privileges in the container
@@ -133,22 +141,29 @@ export class DrageeModel {
     }
 
     @func()
-    async on_publish(npm_token: Secret, source: Directory, git_url?: string, tag?: string): Promise<Container> {
-        if (!git_url && !tag) {
-            throw new Error('Either a git url or a tag must be provided');
+    async on_publish(
+        npm_token: Secret,
+        source?: Directory,
+        git_url?: string,
+        branch?: string,
+        tag?: string
+    ): Promise<Container> {
+        // TODO: test on the ci if with a dummy tag and a dummy package name
+        if (!source || (!git_url && !branch)) {
+            throw new Error('Either a source directory or a git url and a branch name must be provided');
         }
+        const app_files = source ?? this.get_repository(git_url, branch).tree();
+        
+        if (!git_url && !tag) {
+            throw new Error('Either a git url or a tag must be provided to be able to apply a version update');
+        }
+        const tag_update = tag ?? (await this.get_latest_tag(git_url));
 
-        const built_app = await this.build(source);
-        // would be nice to kind of "compose" the directory to select what will be published rather than everything that is not excluded by the .gitignore
-        const built_files = built_app.directory(".")
+        await this.lint_and_test(app_files);
 
-        const tag_update = tag ?? await this.get_latest_tag(git_url);
+        const app = await this.build_and_publish(npm_token, app_files, tag_update);
 
-        const updated_version_app = await this.update_app_version(tag_update, built_files);
-
-        const published_app = await this.publish(updated_version_app, npm_token);
-
-        return published_app;
+        return app;
         // pulling the git tags
         // return {files: dag.git(url).head().tree(),
         //     tags: await dag.git(url).tags(),
@@ -158,15 +173,26 @@ export class DrageeModel {
     }
 
     @func()
+    async build_and_publish(npm_token: Secret, source: Directory, tag: string): Promise<Container> {
+        const built_app = await this.build(source);
+        // would be nice to kind of "compose" the directory to select what will be published rather than everything that is not excluded by the .gitignore
+        const built_files = built_app.directory('.');
+
+        const updated_version_app = await this.update_app_version(tag, built_files);
+        const published_app = await this.publish(updated_version_app, npm_token);
+        return published_app;
+    }
+
+    @func()
     async publish(app: Container, npm_token: Secret): Promise<Container> {
         const published_app = app
             .withSecretVariable('NPM_TOKEN', npm_token)
-            .withExec(["npm", "publish", "--access", "public"]);
+            .withExec(['npm', 'publish', '--access', 'public']);
 
         await published_app.stdout();
         await published_app.stderr();
 
-        return published_app
+        return published_app;
     }
 
     @func()
@@ -174,11 +200,19 @@ export class DrageeModel {
         const updated_app_version = this.node_container()
             .withDirectory('/app', source)
             .withWorkdir('/app')
-            .withExec(["npm", "version", version, "--commit-hooks", "false", "--git-tag-version", "false"]);
+            .withExec([
+                'npm',
+                'version',
+                version,
+                '--commit-hooks',
+                'false',
+                '--git-tag-version',
+                'false'
+            ]);
 
         await updated_app_version.stdout();
         await updated_app_version.stderr();
-        
+
         return updated_app_version;
     }
 
@@ -190,11 +224,11 @@ export class DrageeModel {
 
     @func()
     async get_latest_tag(url: string): Promise<string> {
-        const tags = await dag.git(url).tags()
+        const tags = await dag.git(url).tags();
 
-        return tags.at(-1)
+        return tags.at(-1);
     }
-    
+
     // @func()
     // bun_installed(bun_version?: string): Container {
     //     const bun_binary_location = 'https://bun.sh/install';
