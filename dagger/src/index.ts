@@ -157,7 +157,7 @@ export class DrageeModel {
         if (!git_url && !tag) {
             throw new Error('Either a git url or a tag must be provided to be able to apply a version update');
         }
-        const tag_update = tag ?? (await this.get_latest_tag(git_url));
+        const tag_update = await this.get_tag(tag, git_url);
 
         await this.lint_and_test(app_files);
 
@@ -170,6 +170,16 @@ export class DrageeModel {
         // }
         // const tags = (await dag.git(url).tags())
         // return `Tags: ${tags.join(', ')} | Number of tags: ${tags.length}`;
+    }
+
+    async get_tag(tag: string, git_url: string): Promise<string> { 
+        const retrieved_tag = tag ?? (await this.get_latest_tag(git_url));
+
+        if (retrieved_tag.startsWith('v')) {
+            return retrieved_tag.slice(1)
+        }
+
+        return retrieved_tag;
     }
 
     @func()
