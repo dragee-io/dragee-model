@@ -147,7 +147,7 @@ export class DrageeModel {
         git_url?: string,
         branch?: string,
         tag?: string
-    ): Promise<Container> {
+    ): Promise<void> {
         // TODO: test on the ci if with a dummy tag and a dummy package name
         if (!source || (!git_url && !branch)) {
             throw new Error('Either a source directory or a git url and a branch name must be provided');
@@ -161,9 +161,9 @@ export class DrageeModel {
 
         await this.lint_and_test(app_files);
 
-        const app = await this.build_and_publish(npm_token, app_files, tag_update);
+        await this.build_and_publish(npm_token, app_files, tag_update);
 
-        return app;
+        // return app;
         // pulling the git tags
         // return {files: dag.git(url).head().tree(),
         //     tags: await dag.git(url).tags(),
