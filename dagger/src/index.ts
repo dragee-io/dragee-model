@@ -121,21 +121,8 @@ export class DrageeModel {
     async lint_and_test(source: Directory): Promise<Container> {
         const app = this.mount_app_with(source);
 
-        try {
-            await this.lint(app);
-        } catch (error) {
-            throw new Error('The linter failed', {
-                cause: error
-            });
-        }
-
-        try {
-            await this.test(app);
-        } catch (error) {
-            throw new Error('Tests failed', {
-                cause: error
-            });
-        }
+        await this.lint(app);
+        await this.test(app);
 
         return app;
     }
