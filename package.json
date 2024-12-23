@@ -13,23 +13,23 @@
     },
     "exports": {
         "./asserter": {
-            "bun": "./asserter/index.ts",
+            "bun": "./src/asserter/index.ts",
             "import": "./dist/asserter/index.js"
         },
         "./profiler": {
-            "bun": "./profiler/index.ts",
+            "bun": "./src/profiler/index.ts",
             "import": "./dist/profiler/index.js"
         },
         "./grapher": {
-            "bun": "./grapher/index.ts",
+            "bun": "./src/grapher/index.ts",
             "import": "./dist/grapher/index.js"
         },
         "./common": {
-            "bun": "./common/index.ts",
+            "bun": "./src/common/index.ts",
             "import": "./dist/common/index.js"
         },
         "./test-utils": {
-            "bun": "./test-utils/index.ts",
+            "bun": "./src/test-utils/index.ts",
             "import": "./dist/test-utils/index.js"
         },
         "./tsconfig.bun": "./tsconfig.bun.json"
