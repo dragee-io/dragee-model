@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import type { Dragee } from '@dragee-io/type';
-import type { Equals } from '@dragee-io/test-utils';
+import type { Dragee } from '../../common';
+import type { Equals } from '../../test-utils';
 
 import { generateProfilerWith, type CustomProfiler } from '../index.ts';
 

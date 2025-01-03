@@ -2,11 +2,11 @@ import Bun from 'bun';
 
 await Bun.build({
     entrypoints: [
-        './asserter/index.ts',
-        './profiler/index.ts',
-        './grapher/index.ts',
-        './common/index.ts',
-        './test-utils/index.ts'
+        './src/asserter/index.ts',
+        './src/profiler/index.ts',
+        './src/grapher/index.ts',
+        './src/common/index.ts',
+        './src/test-utils/index.ts'
     ],
     outdir: './dist',
     splitting: true,
